@@ -1,6 +1,5 @@
 <script>
 	import P5 from 'p5-svelte';
-	import FourierTransform from 'fourier-transform';
 	let waves = [
 		{ amplitude: 100, frequency: 0.02, phase: 0, color: [255, 0, 0] },
 		{ amplitude: 80, frequency: 0.04, phase: 0, color: [0, 255, 0] },
