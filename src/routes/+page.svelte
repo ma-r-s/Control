@@ -1,9 +1,9 @@
 <script>
-	import P5 from 'p5-svelte';
+	import { browser } from '$app/environment';
 	let waves = [
-		{ amplitude: 100, frequency: 0.02, phase: 0, color: [255, 0, 0] },
-		{ amplitude: 80, frequency: 0.04, phase: 0, color: [0, 255, 0] },
-		{ amplitude: 60, frequency: 0.06, phase: 0, color: [0, 0, 255] }
+		{ amplitude: 75, frequency: 0.02, phase: 2, color: 'red' },
+		{ amplitude: 50, frequency: 0.04, phase: 1, color: 'green' },
+		{ amplitude: 25, frequency: 0.06, phase: 4, color: 'blue' }
 	];
 	let yAxis = 30;
 	let isPlaying = false; // Animation play state
@@ -16,68 +16,18 @@
 		isPlaying = false;
 		t = 0;
 	};
-	const sketch = (p) => {
-		p.setup = () => {
-			p.createCanvas(p.windowWidth, 300);
-			p.frameRate(60);
-		};
-
-		p.draw = () => {
-			p.background(0);
-
-			// Draw axis
-			p.stroke(255);
-			p.line(0, p.height / 2, p.width, p.height / 2);
-			p.line(yAxis, 0, yAxis, p.height);
-
-			waves.forEach((wave) => {
-				p.noFill();
-				p.stroke(wave.color);
-				p.beginShape();
-				for (let x = 0; x < p.width; x++) {
-					let y = wave.amplitude * p.sin(wave.frequency * (x + t - yAxis) + wave.phase);
-					p.vertex(x, p.height / 2 - y);
-				}
-				p.endShape();
-			});
-			if (isPlaying) t += 0.5;
-		};
-
-		p.windowResized = () => {
-			p.resizeCanvas(p.windowWidth, 300);
-		};
-	};
-
-	const sumSketch = (p) => {
-		p.setup = () => {
-			p.createCanvas(p.windowWidth, 300);
-			p.frameRate(60);
-		};
-
-		p.draw = () => {
-			p.background(0);
-
-			p.stroke(255);
-			p.line(0, p.height / 2, p.width, p.height / 2);
-			p.line(yAxis, 0, yAxis, p.height);
-
-			p.noFill();
-			p.stroke(255);
-			p.beginShape();
-			for (let x = 0; x < p.width; x++) {
-				let sum = 0;
-				waves.forEach((wave) => {
-					sum += wave.amplitude * p.sin(wave.frequency * (x + t - yAxis) + wave.phase);
-				});
-				let y = sum;
-				p.vertex(x, p.height / 2 - y);
-			}
-			p.endShape();
-			if (isPlaying) {
-				t += 0.5;
-			}
-		};
-	};
+	let w = 0;
+	if (browser) {
+		w = window.innerWidth;
+		window.addEventListener('resize', () => {
+			w = window.innerWidth;
+		});
+	}
+	setInterval(() => {
+		if (isPlaying) {
+			t += 1;
+		}
+	}, 5);
 </script>
 
 <main class="m-6">
@@ -91,21 +41,21 @@
 		{/if}
 	</div>
 
-	<div class="flex gap-4">
+	<div class="flex gap-4 md:flex-row flex-col justify-between">
 		{#each waves as _, idx}
-			<div class="w-1/3">
-				<p>Wave {idx + 1}</p>
+			<div>
+				<p class="font-bold py-3">Wave {idx + 1}</p>
 				<input
 					type="range"
-					class="w-full range range-sm range-primary"
+					class="w-full range range-sm range-info"
 					min="0"
-					max="150"
+					max="75"
 					step="1"
 					bind:value={waves[idx].amplitude}
 				/>
 				<input
 					type="range"
-					class="w-full range range-sm range-secondary"
+					class="w-full range range-sm range-warning"
 					min="0"
 					max="0.1"
 					step="0.001"
@@ -113,24 +63,50 @@
 				/>
 				<input
 					type="range"
-					class="w-full range range-sm range-accent"
+					class="w-full range range-sm range-error"
 					min="0"
 					max={Math.PI * 2}
 					step="0.01"
 					bind:value={waves[idx].phase}
 				/>
-				<p>{(waves[idx].phase / Math.PI).toFixed(2)} pi</p>
+				<div class="flex justify-between">
+					<p>Ampl: {waves[idx].amplitude}</p>
+					<p>Freq: {waves[idx].frequency}</p>
+					<p>Phase: {waves[idx].phase}</p>
+				</div>
 			</div>
 		{/each}
 	</div>
-	<div class="flex w-full my-5 justify-center">
-		<div class="border rounded-md overflow-hidden w-fit">
-			<P5 {sketch} />
-		</div>
-	</div>
-	<div class="flex w-full my-5 justify-center">
-		<div class="border rounded-md overflow-hidden w-fit">
-			<P5 sketch={sumSketch} />
-		</div>
-	</div>
+
+	<svg class="w-full my-5 border">
+		<line x1="0" y1="50%" x2="100%" y2="50%" class="stroke-black dark:stroke-white" />
+		<line x1={yAxis} y1="0" x2={yAxis} y2="100%" class="stroke-black dark:stroke-white" />
+
+		{#each waves as wave}
+			<path
+				stroke={wave.color}
+				fill="none"
+				d={Array.from({ length: w }, (_, x) => {
+					const y = wave.amplitude * Math.sin(wave.frequency * (x + t - yAxis) + wave.phase);
+					return x === 0 ? `M ${x},${75 + y}` : `L ${x},${75 + y}`;
+				}).join(' ')}
+			/>
+		{/each}
+	</svg>
+
+	<svg class="w-full my-5 border h-72">
+		<line x1="0" y1="50%" x2="100%" y2="50%" class="stroke-black dark:stroke-white" />
+		<line x1={yAxis} y1="0" x2={yAxis} y2="100%" class="stroke-black dark:stroke-white" />
+		o
+		<path
+			class="stroke-black dark:stroke-white"
+			fill="none"
+			d={Array.from({ length: w }, (_, x) => {
+				const sum = waves.reduce((acc, wave) => {
+					return acc + wave.amplitude * Math.sin(wave.frequency * (x + t - yAxis) + wave.phase);
+				}, 0);
+				return x === 0 ? `M ${x},${144 + sum}` : `L ${x},${144 + sum}`;
+			}).join(' ')}
+		/>
+	</svg>
 </main>
