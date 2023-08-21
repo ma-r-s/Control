@@ -1,9 +1,9 @@
 <script>
 	import { browser } from '$app/environment';
 	let waves = [
-		{ amplitude: 75, frequency: 0.02, phase: 2, color: 'red' },
-		{ amplitude: 50, frequency: 0.04, phase: 1, color: 'green' },
-		{ amplitude: 25, frequency: 0.06, phase: 4, color: 'blue' }
+		{ amplitude: 75, frequency: 0.02, phase: 2, color: 'Red' },
+		{ amplitude: 50, frequency: 0.04, phase: 1, color: 'Green' },
+		{ amplitude: 25, frequency: 0.06, phase: 4, color: 'Blue' }
 	];
 	let yAxis = 30;
 	let isPlaying = false; // Animation play state
@@ -27,7 +27,7 @@
 		if (isPlaying) {
 			t += 1;
 		}
-	}, 5);
+	}, 1000 / 60);
 </script>
 
 <main class="m-6">
@@ -41,10 +41,10 @@
 		{/if}
 	</div>
 
-	<div class="flex gap-4 md:flex-row flex-col justify-between">
-		{#each waves as _, idx}
+	<div class="flex gap-4 md:flex-row flex-col justify-between py-3">
+		{#each waves as wave, idx}
 			<div>
-				<p class="font-bold py-3">Wave {idx + 1}</p>
+				<p class="font-bold py-3">{wave.color} wave</p>
 				<input
 					type="range"
 					class="w-full range range-sm range-info"
@@ -77,8 +77,11 @@
 			</div>
 		{/each}
 	</div>
+	<p class="text-xl font-semibold py-3">Independent Waves</p>
 
-	<svg class="w-full my-5 border">
+	<svg class="w-full my-5 border rounded-2xl">
+		<text x="40" y="18" class="fill-black dark:fill-white">f(t)</text>
+		<text x={w - 80} y="65" class="fill-black dark:fill-white">t</text>
 		<line x1="0" y1="50%" x2="100%" y2="50%" class="stroke-black dark:stroke-white" />
 		<line x1={yAxis} y1="0" x2={yAxis} y2="100%" class="stroke-black dark:stroke-white" />
 
@@ -93,8 +96,11 @@
 			/>
 		{/each}
 	</svg>
+	<p class="text-xl font-semibold py-3">Waves Sum</p>
+	<svg class="w-full my-5 border rounded-2xl h-72">
+		<text x="40" y="18" class="fill-black dark:fill-white">f(t)</text>
+		<text x={w - 80} y="130" class="fill-black dark:fill-white">t</text>
 
-	<svg class="w-full my-5 border h-72">
 		<line x1="0" y1="50%" x2="100%" y2="50%" class="stroke-black dark:stroke-white" />
 		<line x1={yAxis} y1="0" x2={yAxis} y2="100%" class="stroke-black dark:stroke-white" />
 		o
